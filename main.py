@@ -22,7 +22,6 @@ spaceIsPressed = False
 
 def drawForce(horizontal, vertical):
     pygame.draw.line(screen, (0, 0, 0), (x, y), (x + horizontal, x + vertical))
-    # pygame.draw.line(horizontal, vertical, horizontal + (horizontal - x) * 0.2, vertical + (vertical - y) * 0.2)
 
 looping = True
 while looping:
