@@ -65,7 +65,7 @@ while looping:
     if running:
         # kinematics stuff to update values
         for i in Fx:
-            Vx += i/ mass
+            Vx += i / mass
         for i in Fy:
             Vy += i / mass
 
