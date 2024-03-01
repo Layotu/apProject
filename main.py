@@ -4,7 +4,7 @@ import math
 import objects
 from draw import *
 
-# pygame initialization stuff, based on docs
+# pygame initialization stuff, based on documentation
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
@@ -38,7 +38,7 @@ while looping:
     # get position of mouse
     mouse = pygame.mouse.get_pos()
 
-    # if you press the close button or the escape button, quit the while loop
+    # if you press the close button, quit the while loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             looping = False

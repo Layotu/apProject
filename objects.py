@@ -56,5 +56,5 @@ class Body:
         dY = self.Fy[index][1] - self.Fy[index][0]
         pygame.draw.aaline(screen, (100, 0, 0), (self.x, self.y), (self.x + dX * 8, self.y - dY * 8))
         theta = math.atan2(dY, dX)
-        pygame.draw.aaline(screen, (100, 0, 0), (self.x + dX * 8, self.y - dY * 8), (self.x + dX * 8 - max(math.sqrt(dX ** 2 + dY ** 2), 8) * math.cos(theta + 0.5), self.y - dY * 8 + max(math.sqrt(dX ** 2 + dY ** 2), 8) * math.sin(theta + 0.5)))
-        pygame.draw.aaline(screen, (100, 0, 0), (self.x + dX * 8, self.y - dY * 8), (self.x + dX * 8 - max(math.sqrt(dX ** 2 + dY ** 2), 8) * math.cos(theta - 0.5), self.y - dY * 8 + max(math.sqrt(dX ** 2 + dY ** 2), 8) * math.sin(theta - 0.5)))
+        pygame.draw.aaline(screen, (100, 0, 0), (self.x + dX * 8, self.y - dY * 8), (self.x + dX * 8 - max(math.sqrt(dX ** 2 + dY ** 2), 8) * math.cos(theta + 0.5), self.y - dY * 8 + max(math.sqrt(dX ** 2 + dY ** 2), 8) * math.sin(theta + 0.6)))
+        pygame.draw.aaline(screen, (100, 0, 0), (self.x + dX * 8, self.y - dY * 8), (self.x + dX * 8 - max(math.sqrt(dX ** 2 + dY ** 2), 8) * math.cos(theta - 0.5), self.y - dY * 8 + max(math.sqrt(dX ** 2 + dY ** 2), 8) * math.sin(theta - 0.6)))
