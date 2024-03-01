@@ -1,6 +1,7 @@
 import pygame
 import math
 
+import objects
 from draw import *
 
 # pygame initialization stuff, based on docs
@@ -11,15 +12,8 @@ clock = pygame.time.Clock()
 fps = 30
 
 # variables for the box
-x, y = screen.get_width() * 0.375, screen.get_height() * 0.5
-theta = .8
-mass = 8
-Vx, Vy = 0, 0
-Wx, Wy = 0, 0
-
-# arrays for list of forces
-Fx = [0]
-Fy = [-19.6]
+box = objects.Body(screen.get_width() * 0.375, screen.get_height() * 0.5)
+box.add_force((0, 0), (0, -4.9))
 
 # for orbits
 attractor = [640, 360, 32]
@@ -38,8 +32,6 @@ selectToggle = True
 # toggle for pushing buttons
 buttonToggle = True
 
-# self explanitory
-wallCollision = True
 
 looping = True
 while looping:
@@ -63,16 +55,10 @@ while looping:
     spaceIsPressed = pygame.key.get_pressed()[pygame.K_SPACE]
 
     if running:
-        # kinematics stuff to update values
-        for i in Fx:
-            Vx += i / mass
-        for i in Fy:
-            Vy += i / mass
-
-        x += Vx
-        y -= Vy
+        box.step()
 
     # code for orbit mode
+    """
     if orbiting:
         # fun trig stuff to calculate change in horizontal and vertical velocities
         dist = math.sqrt((attractor[0] - x) ** 2 + (attractor[1] - y) ** 2)
@@ -80,9 +66,10 @@ while looping:
         if running:
             Vx += attractor[2] * mass / dist * math.cos(phi)
             Vy += attractor[2] * mass / dist * math.sin(phi)
+    """
 
     # selecting and moving vectors
-    if pygame.mouse.get_pressed(3)[0] and selectToggle:
+    """if pygame.mouse.get_pressed(3)[0] and selectToggle:
         for i in range(len(Fx)):
             if abs(x + Fx[i] * 8 - mouse[0]) < 20 and abs(y - Fy[i] * 8 - mouse[1]) < 20:
                 if selected == i:
@@ -101,19 +88,20 @@ while looping:
         else:
             Fx[selected] = (mouse[0] - x) / 8
             Fy[selected] = -(mouse[1] - y) / 8
-    selectToggle = not pygame.mouse.get_pressed(3)[0]
+    selectToggle = not pygame.mouse.get_pressed(3)[0]"""
 
     # drawing stuffs
-    draw_player(screen, x, y, theta)
-    draw_vector(screen, Vx / 2, Vy / 2, x, y)
-    for i in range(len(Fx)):
-        draw_vector(screen, Fx[i], Fy[i], x, y, (100, 0, 0))
+    box.draw(screen)
+    for i in range(len(box.Fx)):
+        box.draw_force(screen, i)
+    """
     if orbiting:
         draw_vector(screen, attractor[2] * mass / dist * math.cos(phi), attractor[2] * mass / dist * math.sin(phi), x, y,
                     (0, 100, 0))
-        pygame.draw.circle(screen, (0, 0, 0), (attractor[0], attractor[1]), 5)
+        pygame.draw.circle(screen, (0, 0, 0), (attractor[0], attractor[1]), 5)"""
 
     # UI and buttons
+    """
     if not running:
         display_ui(screen)
         if pygame.mouse.get_pressed(3)[0] and screen.get_width() * 0.775 < mouse[0] < screen.get_width() * 0.975 and buttonToggle:
@@ -143,6 +131,7 @@ while looping:
                 orbiting = False
 
         buttonToggle = not pygame.mouse.get_pressed(3)[0]
+        """
 
     clock.tick(fps)
     pygame.display.flip()
