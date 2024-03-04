@@ -1,3 +1,5 @@
+import random
+
 import pygame
 import math
 
@@ -9,11 +11,24 @@ pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 
-fps = 30
+fps = 60
 
 # variables for the box
-box = objects.Body(screen.get_width() * 0.375, screen.get_height() * 0.5)
-box.add_force((0, 0), (0, -4.9))
+boxes = []
+
+for i in range(8):
+    for j in range(8):
+        boxes.append(objects.Body(i * 100, j * 100))
+        boxes[i * 8 + j].mass = math.sqrt(random.randint(1, 150))
+"""
+boxes.append(objects.Body(100, 300))
+boxes.append(objects.Body(400, 300))
+boxes[0].Vx = 5
+boxes[0].mass = 4
+boxes[1].Vx = 2
+boxes[1].mass = 5"""
+
+
 
 # for orbits
 attractor = [640, 360, 32]
@@ -55,50 +70,31 @@ while looping:
     spaceIsPressed = pygame.key.get_pressed()[pygame.K_SPACE]
 
     if running:
-        box.step()
-
-    # code for orbit mode
-    """
-    if orbiting:
-        # fun trig stuff to calculate change in horizontal and vertical velocities
-        dist = math.sqrt((attractor[0] - x) ** 2 + (attractor[1] - y) ** 2)
-        phi = math.atan2(-(attractor[1] - y), (attractor[0] - x))
-        if running:
-            Vx += attractor[2] * mass / dist * math.cos(phi)
-            Vy += attractor[2] * mass / dist * math.sin(phi)
-    """
-
-    # selecting and moving vectors
-    """if pygame.mouse.get_pressed(3)[0] and selectToggle:
-        for i in range(len(Fx)):
-            if abs(x + Fx[i] * 8 - mouse[0]) < 20 and abs(y - Fy[i] * 8 - mouse[1]) < 20:
-                if selected == i:
-                    selected = -1
-                else:
-                    selected = i
-                selectToggle = False
-        if abs(attractor[0] - mouse[0]) < 20 and abs(attractor[1] - mouse[1]) < 20:
-            if selected == -2:
-                selected = -1
-            else:
-                selected = -2
-    elif selected != -1:
-        if selected == -2:
-            attractor[0], attractor[1] = mouse
-        else:
-            Fx[selected] = (mouse[0] - x) / 8
-            Fy[selected] = -(mouse[1] - y) / 8
-    selectToggle = not pygame.mouse.get_pressed(3)[0]"""
+        for i in boxes:
+            i.step()
 
     # drawing stuffs
-    box.draw(screen)
-    for i in range(len(box.Fx)):
-        box.draw_force(screen, i)
+    for i in range(len(boxes)):
+        boxes[i].draw(screen)
+        draw_vector(screen, boxes[i].Vx, boxes[i].Vy, boxes[i].x, boxes[i].y)  # velocity arrow
+
+    for i in boxes:
+        for j in range(len(i.Fx)):
+            i.draw_force(screen, i)
     """
     if orbiting:
         draw_vector(screen, attractor[2] * mass / dist * math.cos(phi), attractor[2] * mass / dist * math.sin(phi), x, y,
                     (0, 100, 0))
         pygame.draw.circle(screen, (0, 0, 0), (attractor[0], attractor[1]), 5)"""
+
+    # interactions with other boxes
+    if running:
+        for i in range(len(boxes)):
+            for j in range(len(boxes)):
+                if i != j:
+                    boxes[i].calc_gravity(screen, boxes[j].x, boxes[j].y, boxes[j].mass)
+                    boxes[i].calc_collision(screen, boxes[j])
+
 
     # UI and buttons
     """
