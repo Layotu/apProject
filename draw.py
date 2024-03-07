@@ -7,12 +7,13 @@ pygame.font.init()
 
 # function for drawing arrows for the velocity and force vectors
 def draw_vector(screen, horizontal, vertical, x, y, color=(0, 0, 0)):
+    arrowSize = 0.1
     if horizontal + vertical == 0:
         return
-    pygame.draw.aaline(screen, color, (x, y), (x + horizontal * 8, y - vertical * 8))
+    pygame.draw.aaline(screen, color, (x, y), (x + horizontal, y - vertical))
     theta = math.atan2(vertical, horizontal)
-    pygame.draw.aaline(screen, color, (x + horizontal * 8, y - vertical * 8), (x + horizontal * 8 - max(math.sqrt(horizontal**2 + vertical**2), 8) * math.cos(theta + 0.5), y - vertical * 8 + max(math.sqrt(horizontal**2 + vertical**2), 8) * math.sin(theta + 0.5)))
-    pygame.draw.aaline(screen, color, (x + horizontal * 8, y - vertical * 8), (x + horizontal * 8 - max(math.sqrt(horizontal**2 + vertical**2), 8) * math.cos(theta - 0.5), y - vertical * 8 + max(math.sqrt(horizontal**2 + vertical**2), 8) * math.sin(theta - 0.5)))
+    pygame.draw.aaline(screen, color, (x + horizontal, y - vertical), (x + horizontal - math.sqrt((horizontal**2 + vertical**2) * arrowSize) * math.cos(theta + 0.5), y - vertical + math.sqrt((horizontal**2 + vertical**2) * arrowSize) * math.sin(theta + 0.5)))
+    pygame.draw.aaline(screen, color, (x + horizontal, y - vertical), (x + horizontal - math.sqrt((horizontal**2 + vertical**2) * arrowSize) * math.cos(theta - 0.5), y - vertical + math.sqrt((horizontal**2 + vertical**2) * arrowSize) * math.sin(theta - 0.5)))
 
 
 # draw the UI
