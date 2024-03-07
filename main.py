@@ -15,20 +15,8 @@ fps = 60
 
 # variables for the box
 boxes = []
-
-for i in range(8):
-    for j in range(8):
-        boxes.append(objects.Body(i * 100, j * 100))
-        boxes[i * 8 + j].mass = math.sqrt(random.randint(1, 150))
-"""
-boxes.append(objects.Body(100, 300))
-boxes.append(objects.Body(400, 300))
-boxes[0].Vx = 5
-boxes[0].mass = 4
-boxes[1].Vx = 2
-boxes[1].mass = 5"""
-
-
+newBox = True
+newCoords = []
 
 # for orbits
 attractor = [640, 360, 32]
@@ -43,10 +31,24 @@ spaceIsPressed = False
 # stuff for selecting vectors
 selected = -1
 selectToggle = True
+newForce = False
+newForceCoords = []
 
 # toggle for pushing buttons
 buttonToggle = True
 
+# settings stuff
+font = pygame.font.SysFont("Jetbrains Mono", 25)
+blockAttraction = False
+friction = False
+collision = True
+gravity = True
+
+print("controls:")
+print("rt click and drag: add new box")
+print("1: toggle friction")
+print("2: toggle gravity")
+print("3: toggle collision")
 
 looping = True
 while looping:
@@ -61,17 +63,78 @@ while looping:
     # clear screen for a new frame
     screen.fill((255, 255, 255))
 
-    # pause the game if you press space
+    # toggle things if you press buttons
+    # pause / play when space is pressed
     if pygame.key.get_pressed()[pygame.K_SPACE] and not spaceIsPressed:
-        selected = -1
         running = not running
-
         spaceIsPressed = True
     spaceIsPressed = pygame.key.get_pressed()[pygame.K_SPACE]
 
+    # friction toggled with 1 key
+    if pygame.key.get_pressed()[pygame.K_1] and buttonToggle:
+        friction = not friction
+        buttonToggle = False
+
+    # attraction toggled with 2 key
+    if pygame.key.get_pressed()[pygame.K_2] and buttonToggle:
+        blockAttraction = not blockAttraction
+        buttonToggle = False
+
+    # collision toggled with 3 key
+    elif pygame.key.get_pressed()[pygame.K_3] and buttonToggle:
+        collision = not collision
+        buttonToggle = False
+
+    # gravity toggled with 4 key
+    elif pygame.key.get_pressed()[pygame.K_4] and buttonToggle:
+        gravity = not gravity
+        buttonToggle = False
+
+    # reset button detection
+    elif not pygame.key.get_pressed()[pygame.K_4] and not pygame.key.get_pressed()[pygame.K_3] and not pygame.key.get_pressed()[pygame.K_2] and not pygame.key.get_pressed()[pygame.K_1] and not buttonToggle:
+        buttonToggle = True
+
+    # add new boxes
+    if pygame.mouse.get_pressed(3)[2] and newBox:
+        newCoords = [mouse[0], mouse[1]]
+        newBox = False
+    elif not pygame.mouse.get_pressed(3)[2] and not newBox:
+        width = math.sqrt((newCoords[0] - mouse[0]) ** 2 + (newCoords[1] - mouse[1]) ** 2)
+        boxes.append(objects.Body(newCoords[0], newCoords[1]))
+        boxes[len(boxes) - 1].mass = max(width / 32, 1)
+        newBox = True
+    elif not newBox:
+        width = math.sqrt((newCoords[0] - mouse[0]) ** 2 + (newCoords[1] - mouse[1]) ** 2)
+        text = font.render("Mass: " + str(round(max(width / 32, 1) * 100) / 100.0), True, 0)
+        width = (width / 32) ** 0.3333 * 6
+        screen.blit(text, (newCoords[0] - width, newCoords[1] - width - 20))
+        pygame.draw.rect(screen, (200, 255, 200), rect=(newCoords[0] - width, newCoords[1] - width, width * 2, width * 2))
+
+    # add forces to boxes
+    if pygame.mouse.get_pressed(3)[0] and not newForce:
+        newForceCoords = [mouse[0], mouse[1]]
+        newForce = True
+
+    # interactions with other boxes
     if running:
+        for i in range(len(boxes)):
+            for j in range(len(boxes)):
+                if i != j:
+                    if blockAttraction:
+                        boxes[i].calc_gravity(screen, boxes[j].x, boxes[j].y, boxes[j].mass)
+                    if collision:
+                        boxes[i].calc_collision(screen, boxes[j])
+
+    # update boxes
+    if gravity and running:
         for i in boxes:
-            i.step()
+            i.step(friction)
+            i.wall_collision(screen)
+            i.Vy -= .98
+    elif running:
+        for i in boxes:
+            i.step(friction)
+            i.wall_collision(screen)
 
     # drawing stuffs
     for i in range(len(boxes)):
@@ -87,47 +150,38 @@ while looping:
                     (0, 100, 0))
         pygame.draw.circle(screen, (0, 0, 0), (attractor[0], attractor[1]), 5)"""
 
-    # interactions with other boxes
+    # setting display
     if running:
-        for i in range(len(boxes)):
-            for j in range(len(boxes)):
-                if i != j:
-                    boxes[i].calc_gravity(screen, boxes[j].x, boxes[j].y, boxes[j].mass)
-                    boxes[i].calc_collision(screen, boxes[j])
+        text = font.render("Playing", True, 0)
+        screen.blit(text, (5, 5))
+    else:
+        text = font.render("Paused", True, 0)
+        screen.blit(text, (5, 5))
+    if friction:
+        text = font.render("Friction On", True, 0)
+        screen.blit(text, (5, 25))
+    else:
+        text = font.render("Frictionless", True, 0)
+        screen.blit(text, (5, 25))
+    if blockAttraction:
+        text = font.render("Gravity between blocks On", True, 0)
+        screen.blit(text, (5, 45))
+    else:
+        text = font.render("No gravity between blocks", True, 0)
+        screen.blit(text, (5, 45))
+    if collision:
+        text = font.render("Collision On", True, 0)
+        screen.blit(text, (5, 65))
+    else:
+        text = font.render("No collision", True, 0)
+        screen.blit(text, (5, 65))
+    if gravity:
+        text = font.render("Gravity On", True, 0)
+        screen.blit(text, (5, 85))
+    else:
+        text = font.render("No Gravity", True, 0)
+        screen.blit(text, (5, 85))
 
-
-    # UI and buttons
-    """
-    if not running:
-        display_ui(screen)
-        if pygame.mouse.get_pressed(3)[0] and screen.get_width() * 0.775 < mouse[0] < screen.get_width() * 0.975 and buttonToggle:
-            # add new force
-            if screen.get_height() * 0.05 < mouse[1] < screen.get_height() * 0.2:
-                buttonToggle = False
-                Fx.append(0)
-                Fy.append(0)
-                selected = len(Fx) - 1
-            if screen.get_height() * 0.25 < mouse[1] < screen.get_height() * 0.4:
-                buttonToggle = False
-                Fx.pop(selected)
-                Fy.pop(selected)
-                selected = -1
-            if screen.get_height() * 0.45 < mouse[1] < screen.get_height() * 0.6:
-                buttonToggle = False
-                orbiting = not orbiting
-            if screen.get_height() * 0.65 < mouse[1] < screen.get_height() * 0.8:
-                buttonToggle = False
-            if screen.get_height() * 0.85 < mouse[1] < screen.get_height():
-                buttonToggle = False
-                x, y = screen.get_width() * 0.375, screen.get_height() * 0.5
-                theta = .8
-                Vx, Vy = 0, 0
-                Fx = [0]
-                Fy = [-19.6]
-                orbiting = False
-
-        buttonToggle = not pygame.mouse.get_pressed(3)[0]
-        """
 
     clock.tick(fps)
     pygame.display.flip()
