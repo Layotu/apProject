@@ -69,27 +69,22 @@ while looping:
         running = not running
         spaceIsPressed = True
     spaceIsPressed = pygame.key.get_pressed()[pygame.K_SPACE]
-
     # friction toggled with 1 key
     if pygame.key.get_pressed()[pygame.K_1] and buttonToggle:
         friction = not friction
         buttonToggle = False
-
     # attraction toggled with 2 key
     if pygame.key.get_pressed()[pygame.K_2] and buttonToggle:
         blockAttraction = not blockAttraction
         buttonToggle = False
-
     # collision toggled with 3 key
     elif pygame.key.get_pressed()[pygame.K_3] and buttonToggle:
         collision = not collision
         buttonToggle = False
-
     # gravity toggled with 4 key
     elif pygame.key.get_pressed()[pygame.K_4] and buttonToggle:
         gravity = not gravity
         buttonToggle = False
-
     # reset button detection
     elif not pygame.key.get_pressed()[pygame.K_4] and not pygame.key.get_pressed()[pygame.K_3] and not pygame.key.get_pressed()[pygame.K_2] and not pygame.key.get_pressed()[pygame.K_1] and not buttonToggle:
         buttonToggle = True
@@ -115,6 +110,16 @@ while looping:
         newForceCoords = [mouse[0], mouse[1]]
         newForce = True
 
+    # update boxes
+    if gravity and running:
+        for i in boxes:
+            i.step(friction)
+            i.wall_collision(screen)
+    elif running:
+        for i in boxes:
+            i.step(friction)
+            i.wall_collision(screen)
+
     # interactions with other boxes
     if running:
         for i in range(len(boxes)):
@@ -125,25 +130,13 @@ while looping:
                     if collision:
                         boxes[i].calc_collision(screen, boxes[j])
 
-    # update boxes
-    if gravity and running:
-        for i in boxes:
-            i.step(friction)
-            i.wall_collision(screen)
-            i.Vy -= .98
-    elif running:
-        for i in boxes:
-            i.step(friction)
-            i.wall_collision(screen)
-
     # drawing stuffs
     for i in range(len(boxes)):
         boxes[i].draw(screen)
         draw_vector(screen, boxes[i].Vx, boxes[i].Vy, boxes[i].x, boxes[i].y)  # velocity arrow
+        for j in range(len(boxes[i].forces) - 1):
+            boxes[i].draw_force(screen, i)
 
-    for i in boxes:
-        for j in range(len(i.Fx)):
-            i.draw_force(screen, i)
     """
     if orbiting:
         draw_vector(screen, attractor[2] * mass / dist * math.cos(phi), attractor[2] * mass / dist * math.sin(phi), x, y,
@@ -181,7 +174,6 @@ while looping:
     else:
         text = font.render("No Gravity", True, 0)
         screen.blit(text, (5, 85))
-
 
     clock.tick(fps)
     pygame.display.flip()
